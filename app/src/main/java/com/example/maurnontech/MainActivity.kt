@@ -11,11 +11,14 @@ import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import MyWebServer
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
+    private val serverPort = 8080
+    private lateinit var webServer: MyWebServer
 
     private val fileChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -34,13 +37,13 @@ class MainActivity : ComponentActivity() {
         // Initialize the WebView
         webView = WebView(this)
 
-        // Enable JavaScript
+        // Enable JavaScript and related settings
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
 
-        // Set a WebViewClient to handle loading URLs within the WebView
+        // Set a WebViewClient to handle internal URL loading
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 view?.loadUrl(url ?: "")
@@ -48,7 +51,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Set a WebChromeClient to handle file chooser dialogs and other browser features
+        // Set a WebChromeClient to handle file chooser dialogs
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
                 webView: WebView?,
@@ -64,7 +67,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Set a DownloadListener to handle downloads
+        // Set a DownloadListener to process downloads
         webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
             val request = DownloadManager.Request(Uri.parse(url))
             request.setMimeType(mimeType)
@@ -85,8 +88,11 @@ class MainActivity : ComponentActivity() {
         // Set the WebView as the content view
         setContentView(webView)
 
-        // !!!!!Your url here!!!!!
-        // Load the specified URL
-        webView.loadUrl("https://your url here!/")
+        // Start the local web server to serve files from the assets folder
+        webServer = MyWebServer(this, serverPort)
+        webServer.start()
+
+        // Load the front end served by the local web server
+        webView.loadUrl("https://vscode.dev")
     }
 }
