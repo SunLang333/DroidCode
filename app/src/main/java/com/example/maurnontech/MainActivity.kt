@@ -42,6 +42,10 @@ class MainActivity : ComponentActivity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
 
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
+
+
         // Set a WebViewClient to handle internal URL loading
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
@@ -91,6 +95,6 @@ class MainActivity : ComponentActivity() {
         webServer.start()
 
         // Load the front end served by the local web server
-        webView.loadUrl("https://vscode.dev")
+        webView.loadUrl("https://idx.google.com/")
     }
 }
